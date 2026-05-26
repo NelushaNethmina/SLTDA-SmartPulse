@@ -1,0 +1,25 @@
+# Virtual Environment
+.venv/
+
+# Secrets
+.env
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Node
+node_modules/
+.next/
+
+# Data files
+data/raw/
+*.pdf
+
+# pip installer
+get-pip.py
+
+# IDE
+.vscode/
+.idea/
