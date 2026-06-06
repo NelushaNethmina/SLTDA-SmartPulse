@@ -12,7 +12,7 @@ from ..config import settings
 from ..database import get_db
 
 
-# ── Setup ─────────────────────────────────────────────
+# setup
 router = APIRouter()
 
 pwd_context = CryptContext(
@@ -25,7 +25,7 @@ oauth2_scheme = OAuth2PasswordBearer(
 )
 
 
-# ── Response Model ────────────────────────────────────
+#Response Model 
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str
@@ -34,10 +34,10 @@ class TokenResponse(BaseModel):
     district: str | None
 
 
-# ── Helper Functions ──────────────────────────────────
+#Helper Functions
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """
-    Plain password + bcrypt hash compare කරනවා
+    Plain password + bcrypt hash compare 
     True = match, False = no match
     """
     return pwd_context.verify(plain_password, hashed_password)
@@ -45,7 +45,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 def create_token(data: dict) -> str:
     """
-    JWT token create කරනවා
+    JWT token create
     data = {"sub": email, "role": role, ...}
     """
     to_encode = data.copy()
@@ -60,7 +60,7 @@ def create_token(data: dict) -> str:
     )
 
 
-# ── Login Endpoint ────────────────────────────────────
+# Login Endpoint
 @router.post("/login", response_model=TokenResponse)
 async def login(
     email: str = Body(...),
@@ -72,7 +72,7 @@ async def login(
     email + password → JWT token return
     """
 
-    # Step 1: DB ෙකෙන් user find කරනවා
+    # Step 1: DB user find 
     result = db.execute(
         text(
             "SELECT * FROM users "
@@ -88,14 +88,14 @@ async def login(
             detail="Invalid email or password",
         )
 
-    # Step 2: Password verify කරනවා
+    # Step 2: Password verify 
     if not verify_password(password, result.password_hash):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password",
         )
 
-    # Step 3: JWT token create කරනවා
+    # Step 3: JWT token create
     token = create_token({
         "sub":      result.email,
         "role":     result.role,
@@ -103,7 +103,7 @@ async def login(
         "district": result.district,
     })
 
-    # Step 4: Token return කරනවා
+    # Step 4: Token return 
     return TokenResponse(
         access_token=token,
         token_type="bearer",
@@ -113,7 +113,7 @@ async def login(
     )
 
 
-# ── Protected Route Dependency ────────────────────────
+# Protected Route Dependency
 async def get_current_user(
     token: str = Depends(oauth2_scheme),
     db: Session = Depends(get_db)
@@ -134,7 +134,7 @@ async def get_current_user(
     )
 
     try:
-        # Token decode කරනවා
+        # Token decode 
         payload = jwt.decode(
             token,
             settings.secret_key,
@@ -147,7 +147,7 @@ async def get_current_user(
     except JWTError:
         raise credentials_error
 
-    # DB ෙකෙන් user verify කරනවා
+    # DB user verify 
     result = db.execute(
         text(
             "SELECT * FROM users "
