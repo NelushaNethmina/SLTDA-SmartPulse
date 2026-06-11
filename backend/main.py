@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
-from .routers import auth
+from .routers import auth, arrivals
 
 
 app = FastAPI(
@@ -22,10 +22,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 app.include_router(
-    auth.router, 
-    prefix="/api/auth", 
+    auth.router,
+    prefix="/api/auth",
     tags=["Authentication"]
+)
+app.include_router(
+    arrivals.router,
+    prefix="/api/arrivals",
+    tags=["Arrivals"]
 )
 
 
@@ -44,5 +50,3 @@ async def health_check():
         "status": "healthy",
         "database": "connected",
     }
-    
-    
